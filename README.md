@@ -1,5 +1,5 @@
 # Scheduler
-Authors: Karmehr Arora & Sung Jun Bok.
+Authors: Karmehr Arora
 
 Python Scheduler that allows you to Create, Search, and Delete events.
 Aggregates class, meeting, job, and task info from user and represents them in a daily calendar view. 
