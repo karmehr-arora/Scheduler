@@ -12,7 +12,6 @@ while continues:
         with open('schedule.csv', 'r') as data:
             dictionaries = csv.DictReader(data)
             entire_schedule = list(dictionaries)
-            print('\nschedule: \n', entire_schedule, '\n')
 
     val = input("__________________________________________________________\nSelect one of the following main menu option: \n [C]reate, [V]iew schedules, [D]elete Event, [Q]uit\n")
     val = val.upper()
@@ -26,15 +25,21 @@ while continues:
         startTime, endTime = m.compare_time()
         date = m.request_date()
         #repeat = input("Would you like to repeat this event [N]one, [D]aily, [W]eekly:\n")
-        m.compare_datetime(entire_schedule, date, startTime, endTime)
-        m.create(name, startTime, endTime, date)
+        if (m.compare_datetime(entire_schedule, date, startTime, endTime)):
+            m.create(name, startTime, endTime, date)
+            print("Successfully Created an Event\n")
+        else:
+            print("Invalid event: Time conflict(s) between events\n")
+            continue
         
     elif val == "D":
+        name = m.request_name(entire_schedule, True)
         print("Deleting")
 
     elif val == "V":
-        print("Viewing")
+        print('\nschedule: \n', entire_schedule, '\n')
 
     else:
         print("Error: Incorrect Input Format\n")
+
 print("done")

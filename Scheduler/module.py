@@ -16,19 +16,33 @@ def create(Name, startTime, EndTime, Date):
             writer.writeheader()
             writer.writerows(mydict)
 
-def request_name(entire_schedule):
-    res = [ history['name'] for history in entire_schedule]
-    name_unique = False
-    while not name_unique:
+def deleteEvent(name):
+    with open("schedule.csv", "r") as input:
+        with open("temp.csv", "w") as output:
+            # iterate all lines from file
+            for line in input:
+                # if substring contain in a line then don't write it
+                if name not in line.strip("\n"):
+                    output.write(line)
+    os.replace('temp.csv', 'schedule.csv')
+
+def request_name(entire_schedule, delete = False):
+    names = [ history['name'] for history in entire_schedule]
+    unique = False
+    while not unique:
         name = input("Name of Event:\n")
         checked = False
-        for hist in res:
-            if(name.lower() == hist.lower()):
+        for history in names:
+            if(name.lower() == history.lower()):
                 checked = True
         if (checked):
-            print("Name is already in use. Please enter a valid name.\n")
+            if (delete):
+                deleteEvent(name)
+                unique = True
+            else:
+                print("Name is already in use. Please enter a valid name.\n")
         else:
-            name_unique = True
+            unique = True
 
     return name
 
@@ -77,32 +91,24 @@ def compare_time():
 def compare_datetime(entire_schedule, curr_date, curr_start, curr_end):
     # all of the dates in the schedule
     dates = [ history['date'] for history in entire_schedule]
-    print(dates)
-    datetime_compare = False
-    while not datetime_compare:
-        # change curr_date to string of format MM-DD-YYYY so it can compare with dates
-        # need to change start and end arrays into date/time format
-        if (curr_date in dates):
-             # all of the starts in the schedule
-            starts = [ history['start'] for history in entire_schedule if history.get('date') == curr_date]
-            print(starts)
-            # all of the end times in the schedule
-            ends = [ history['end'] for history in entire_schedule if history.get('date') == curr_date]
-            print(ends)
+    curr_date = curr_date.strftime("%m-%d-%Y")
+    curr_start = curr_start.time()
+    curr_end = curr_end.time()
+    # change curr_date to string of format MM-DD-YYYY so it can compare with dates
+    # need to change start and end arrays into date/time format
+    if (curr_date in dates):
+        # all of the starts & end times in the schedule
+        starts = [datetime.datetime.strptime(history['start'], "%H:%M").time() for history in entire_schedule if history.get('date') == curr_date]
+        ends = [datetime.datetime.strptime(history['end'], "%H:%M").time() for history in entire_schedule if history.get('date') == curr_date]
 
-            for i in range (len(starts)):
-                if (curr_start < starts[i] and curr_end > starts[i] and curr_end < ends[i]):
-                    print("conflict 1")
-                elif(curr_start > starts[i] and curr_start < ends[i] and curr_end > ends[i]):
-                    print("conflict 2")
-                elif(curr_start > starts[i] and curr_end < ends[i]):
-                    print("conflict 3")
-                elif(curr_start < starts[i] and curr_end > ends[i]):
-                    print("conflict 4")
-                else:
-                    print("all good, cheerio mate")
-            datetime_compare = True
-
-        
-                
-                
+        for i in range (len(starts)):
+            if (curr_start <= starts[i] and curr_end > starts[i] and curr_end <= ends[i]):
+                return False
+            elif(curr_start >= starts[i] and curr_start < ends[i] and curr_end >= ends[i]):
+                return False
+            elif(curr_start >= starts[i] and curr_end <= ends[i]):
+                return False
+            elif(curr_start <= starts[i] and curr_end >= ends[i]):
+                return False
+            else:
+                return True
